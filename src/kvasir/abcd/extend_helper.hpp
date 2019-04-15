@@ -9,7 +9,6 @@
 //  http://www.boost.org/LICENSE_1_0.txt
 
 #include <boost/mp11/algorithm.hpp>
-#include <boost/mp11/bind.hpp>
 
 namespace kvasir {
 namespace abcd {
@@ -64,14 +63,17 @@ using take_until =
 } // namespace detail
 
 template <class B, class... Ds>
-struct extend {
+class extend {
+  template <class V, class Q>
+  using inv_ = boost::mp11::mp_invoke_q<Q, V, Ds...>;
+
+public:
   using extend_root = B;
   using extend_dl   = boost::mp11::mp_list<Ds...>;
 
   // with_ql<qlist<M1, M2>>  =>  M2<M1<B, Ds...>, Ds...>
   template <class QL>
-  using with_ql = boost::mp11::mp_reverse_fold_q<boost::mp11::mp_reverse<QL>, B,
-      boost::mp11::mp_bind_back<boost::mp11::mp_invoke, Ds...>>;
+  using with_ql = boost::mp11::mp_fold<QL, B, inv_>;
 
   // with_t<M1, M2>  =>  M2<M1<B, Ds...>, Ds...>
   template <template <class...> class... Ms>
